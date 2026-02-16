@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 const mongooseSequence = require('mongoose-sequence')(mongoose);
 
 const EmployeeSchema = new mongoose.Schema({
@@ -12,6 +13,11 @@ const EmployeeSchema = new mongoose.Schema({
         required: true,
         lowercase: true,
         match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address.']
+    },
+    // 🔐 ADD PASSWORD FIELD
+    password: {
+        type: String,
+        required: true
     },
     phone_number: {
         type: String,
@@ -75,6 +81,15 @@ const EmployeeSchema = new mongoose.Schema({
         projectId:[{type:String}]
     }
 
+});
+
+// 🔴 ADD THIS PASSWORD HASHING HERE
+EmployeeSchema.pre("save", async function(next){
+    if(!this.isModified("password")) return next();
+
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
 });
 
 // Apply the auto-increment plugin to the schema

@@ -38,9 +38,11 @@ const SubmitButton = styled(Button)({
 });
 
 export default function Login() {
+  // const [email, setEmail] = useState('');
+  // const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const [password, setPassword] = useState('');
+  // const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -48,39 +50,68 @@ export default function Login() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const requestOtp = async () => {
-    if (!validateEmail(email)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
+  // const requestOtp = async () => {
+  //   if (!validateEmail(email)) {
+  //     alert('Please enter a valid email address.');
+  //     return;
+  //   }
 
-    setLoading(true);
-    try {
-      await axios.post('http://localhost:5000/request-otp', { email }, { withCredentials: true });
-      setOtpSent(true);
-      alert('OTP has been sent to your email.');
-    } catch (error) {
-      console.error('Error requesting OTP:', error);
-      alert('Error requesting OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   setLoading(true);
+  //   try {
+  //     await axios.post('http://localhost:5000/request-otp', { email }, { withCredentials: true });
+  //     setOtpSent(true);
+  //     alert('OTP has been sent to your email.');
+  //   } catch (error) {
+  //     console.error('Error requesting OTP:', error);
+  //     alert('Error requesting OTP. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const handleLogin = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await axios.post('http://localhost:5000/login', { email, otp }, { withCredentials: true });
+  //     // const { token } = response.data;
+  //     // localStorage.setItem('authToken', token);
+  //     navigate('/home');
+  //   } catch (error) {
+  //     console.error('Login failed:', error);
+  //     alert('Invalid OTP. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleLogin = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:5000/login', { email, otp }, { withCredentials: true });
-      const { token } = response.data;
-      localStorage.setItem('authToken', token);
-      navigate('/home');
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('Invalid OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!email || !password) {
+    alert("Enter email & password");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/login",
+      { email, password },
+      { withCredentials: true }
+    );
+
+    const token = response.data.token;
+
+    // store token
+    localStorage.setItem("token", token);
+
+    navigate("/home");
+  } catch (error) {
+    console.error(error);
+    alert("Invalid credentials");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -92,63 +123,55 @@ export default function Login() {
     }
   };
 
-  return (
-    <Background>
-      <LoginCard>
-        <CardContent>
-          <LockOutlinedIcon sx={{ fontSize: 40, color: '#4caf50' }} />
-          <LoginTitle variant="h5">Sign In</LoginTitle>
-          {!otpSent ? (
-            <>
-              <Typography variant="body2" color="textSecondary" paragraph>
-                Please enter your email to receive an OTP.
-              </Typography>
-              <TextField
-                label="Email"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={loading}
-              />
-              <SubmitButton
-                variant="contained"
-                fullWidth
-                onClick={requestOtp}
-                disabled={loading || !email}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Request OTP'}
-              </SubmitButton>
-            </>
-          ) : (
-            <>
-              <Typography variant="body2" color="textSecondary" paragraph>
-                Please enter the OTP sent to your email.
-              </Typography>
-              <TextField
-                label="OTP"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={loading}
-              />
-              <SubmitButton
-                variant="contained"
-                fullWidth
-                onClick={handleLogin}
-                disabled={loading || !otp}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Sign In'}
-              </SubmitButton>
-            </>
-          )}
-        </CardContent>
-      </LoginCard>
-    </Background>
-  );
+return (
+  <Background>
+    <LoginCard>
+      <CardContent>
+        <LockOutlinedIcon sx={{ fontSize: 40, color: '#4caf50' }} />
+        <LoginTitle variant="h5">Sign In</LoginTitle>
+
+        <Typography variant="body2" color="textSecondary" paragraph>
+          Please enter your email and password to login.
+        </Typography>
+
+        <TextField
+          label="Email"
+          fullWidth
+          margin="normal"
+          variant="outlined"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") handleLogin();
+          }}
+        />
+
+        <TextField
+          label="Password"
+          type="password"
+          fullWidth
+          margin="normal"
+          variant="outlined"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={loading}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") handleLogin();
+          }}
+        />
+
+        <SubmitButton
+          variant="contained"
+          fullWidth
+          onClick={handleLogin}
+          disabled={loading || !email || !password}
+        >
+          {loading ? <CircularProgress size={24} /> : "Login"}
+        </SubmitButton>
+      </CardContent>
+    </LoginCard>
+  </Background>
+);
+
 }

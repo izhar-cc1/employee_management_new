@@ -106,7 +106,7 @@ const ProjectListItem = styled(ListItem)({
 });
 
 export default function Home() {
-  useAuth()
+  const { loading } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -129,10 +129,14 @@ export default function Home() {
       .catch(error => console.error('Error fetching employees:', error));
 
     // Fetch projects
-    axios.get('http://localhost:5000/projects/',{ withCredentials: true })
+    axios.get('http://localhost:5000/projects/')
       .then(response => setProjects(response.data))
       .catch(error => console.error('Error fetching projects:', error));
   }, []);
+
+  if (loading) {
+    return null; // or spinner
+  }
 
   const handleAddEmployeeClick = () => {
     navigate('/add-employee');
