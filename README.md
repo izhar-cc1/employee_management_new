@@ -56,15 +56,7 @@ The Employee Management System (EMS) is a robust web application designed to str
            cd backend
            npm ci
    ```
-3.**Configure OAuth:**
-
-Go to Google Cloud Console and create an account.
-Set up an OAuth service by enabling the Gmail API.
-Use your email ID to send OTP and set the authorized email IDs.
-Replace the tokens in backend/config/config.env with your OAuth credentials.
-
-
-4.**Run the application:**
+3.**Run the application:**
 frontend>
 ```bash
 npm run dev
@@ -74,5 +66,5 @@ backend>
 npm start
 ```
 
-5.**Access the Application:**
+4.**Access the Application:**
 Open your browser and navigate to http://localhost:5173 to use the application.
