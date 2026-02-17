@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, TextField, Menu, MenuItem } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { styled } from '@mui/system';
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
+import { formatToInputDate } from './utils/date.js';
 
 const Background = styled(Box)({
   height: '100vh',
@@ -61,25 +62,25 @@ export default function EmployeeDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedEmployee, setEditedEmployee] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState(['Active', 'Terminated', 'Resigned', 'Retired']);
+  const statusOptions = ['Active', 'Terminated', 'Resigned', 'Retired'];
 
   const qualificationOptions = ['B.E', 'M.E', 'B.Tech', 'M.Tech', 'BBA', 'MBA', 'MCA', 'BCA', 'B.Sc', 'M.Sc'];
   const roleOptions = ['Intern', 'Trainee', 'Junior', 'Senior', 'Team Lead', 'Manager'];
 
   useEffect(() => {
     if (employeeId) {
-      axios.get(`http://localhost:5000/getEmployee/id/${employeeId}`, { withCredentials: true })
+      api.get(`/getEmployee/id/${employeeId}`)
         .then(response => {
           const employeeData = response.data;
-          employeeData.joining_date = formatDate(employeeData.joining_date);
-          employeeData.DoB = formatDate(employeeData.DoB);
+          employeeData.joining_date = formatToInputDate(employeeData.joining_date);
+          employeeData.DoB = formatToInputDate(employeeData.DoB);
           const projectIds = employeeData.projects?.projectId || [];
           
           if (Array.isArray(projectIds) && projectIds.length > 0) {
             // Fetch all projects by IDs
             Promise.all(
               projectIds.map(id =>
-                axios.get(`http://localhost:5000/getProject/id/${id}`, { withCredentials: true })
+                api.get(`/getProject/id/${id}`)
                   .then(response => response.data)
               )
             )
@@ -108,12 +109,6 @@ export default function EmployeeDetails() {
   }, [employeeId]);
   
 
-  const formatDate = (date) => {
-    if (!date) return '';
-    const formattedDate = new Date(date);
-    return !isNaN(formattedDate) ? formattedDate.toISOString().split('T')[0] : '';
-  };
-
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };
@@ -127,7 +122,7 @@ export default function EmployeeDetails() {
   };
 
   const handleSave = () => {
-    axios.put(`http://localhost:5000/editEmployee/editbyid/${employeeId}`, editedEmployee, { withCredentials: true })
+    api.put(`/editEmployee/editbyid/${employeeId}`, editedEmployee)
       .then(() => {
         setEmployee(editedEmployee);
         setIsEditing(false);
@@ -144,7 +139,7 @@ export default function EmployeeDetails() {
 
   const handleStatusClose = (status) => {
     if (status) {
-      axios.put(`http://localhost:5000/editEmployee/editbyid/${employeeId}`, { ...editedEmployee, status }, { withCredentials: true })
+      api.put(`/editEmployee/editbyid/${employeeId}`, { ...editedEmployee, status })
         .then(() => {
           setEditedEmployee((prev) => ({ ...prev, status }));
           setEmployee((prev) => ({ ...prev, status }));

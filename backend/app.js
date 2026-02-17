@@ -45,6 +45,8 @@ const getbyid = require(path.join(__dirname, "routes", "getbyid"));
 const addproject = require(path.join(__dirname, "routes", "addproject"));
 const getProject = require(path.join(__dirname, "routes", "projectid"));
 const editproject = require(path.join(__dirname, "routes", "editproject"));
+const leaves = require(path.join(__dirname, "routes", "leaves"));
+const attendance = require(path.join(__dirname, "routes", "attendance"));
 
 global.__basedir = __dirname;
 
@@ -301,6 +303,8 @@ app.use("/editEmployee/", verifyToken, editbyid);
 app.use("/addProject", verifyToken, addproject);
 app.use("/getProject/", verifyToken, getProject);
 app.use("/editProject/", verifyToken, editproject);
+app.use("/leaves", verifyToken, leaves);
+app.use("/attendance", verifyToken, attendance);
 
 // const oAuth2Client = new google.auth.OAuth2(
 //   process.env.CLIENT_ID,

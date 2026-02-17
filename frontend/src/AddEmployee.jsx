@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Paper, MenuItem, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { styled } from '@mui/system';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
 const Background = styled(Box)({
   height: '100vh',
   backgroundColor: '#fff',
@@ -95,9 +95,7 @@ export default function AddEmployee() {
   const handleSubmit = () => {
     console.log('Submitting form data:', formData);
 
-    axios.post('http://localhost:5000/addEmployee', formData, {
-      withCredentials: true
-    })
+    api.post('/addEmployee', formData)
       .then(response => {
         console.log('Employee added:', response.data);
         navigate('/home');

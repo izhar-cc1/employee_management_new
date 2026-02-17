@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Button, Paper, TextField, List, ListItem, ListItemText, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ReportIcon from '@mui/icons-material/Report';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline'; // Use this or similar icon for Projects
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { red } from '@mui/material/colors';
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -114,12 +114,12 @@ export default function Home() {
   const [view, setView] = useState('employees'); // 'employees', 'departments', or 'projects'
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Active'); // Default status
-  const [statusOptions] = useState(['Active', 'Terminated', 'Retired', 'Resigned']);
+  const statusOptions = ['Active', 'Terminated', 'Retired', 'Resigned'];
   const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/',{ withCredentials: true })
+    api.get('/')
       .then(response => {
         setEmployees(response.data);
         // Extract unique departments
@@ -129,14 +129,10 @@ export default function Home() {
       .catch(error => console.error('Error fetching employees:', error));
 
     // Fetch projects
-    axios.get('http://localhost:5000/projects/')
+    api.get('/projects/')
       .then(response => setProjects(response.data))
       .catch(error => console.error('Error fetching projects:', error));
   }, []);
-
-  if (loading) {
-    return null; // or spinner
-  }
 
   const handleAddEmployeeClick = () => {
     navigate('/add-employee');
@@ -159,6 +155,14 @@ export default function Home() {
     navigate('/project-details', { state: { projectId: id } });
   };
 
+  const handleLeaveManagementClick = () => {
+    navigate('/leave-management');
+  };
+
+  const handleAttendanceManagementClick = () => {
+    navigate('/attendance-management');
+  };
+
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
@@ -177,8 +181,7 @@ export default function Home() {
   };
 
   const handleLogout = () => {
-    
-    axios.post('http://localhost:5000/logout', {}, { withCredentials: true })
+    api.post('/logout')
       .then(response => {
         console.log(response.data);
         // Optionally, you can handle any state updates or cleanup here
@@ -199,12 +202,20 @@ export default function Home() {
     
   };
 
-  const filteredEmployees = employees.filter(employee =>
-    (`${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     employee.department.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (view === 'employees' ? (selectedDepartment ? employee.department === selectedDepartment : true) : true) &&
-    (view === 'employees' ? employee.status === selectedStatus : true)
+  const filteredEmployees = useMemo(
+    () =>
+      employees.filter(employee =>
+        (`${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          employee.department.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (view === 'employees' ? (selectedDepartment ? employee.department === selectedDepartment : true) : true) &&
+        (view === 'employees' ? employee.status === selectedStatus : true)
+      ),
+    [employees, searchQuery, selectedDepartment, selectedStatus, view]
   );
+
+  if (loading) {
+    return null; // or spinner
+  }
 
 
 
@@ -250,6 +261,14 @@ export default function Home() {
           <DashboardItem button onClick={() => handleDashboardClick('status')}>
             <ReportIcon sx={{marginRight:'10px'}}/>
             <Typography sx={{ marginRight: '10px' }}>Status</Typography>
+          </DashboardItem>
+          <DashboardItem button onClick={handleLeaveManagementClick}>
+            <EventNoteIcon sx={{ marginRight: '10px' }} />
+            <ListItemText primary="Leave Management" />
+          </DashboardItem>
+          <DashboardItem button onClick={handleAttendanceManagementClick}>
+            <AccessTimeIcon sx={{ marginRight: '10px' }} />
+            <ListItemText primary="Attendance" />
           </DashboardItem>
           <DashboardItem button onClick={() => handleLogout()}>
             <LogoutIcon sx={{ marginRight: '10px' }} />

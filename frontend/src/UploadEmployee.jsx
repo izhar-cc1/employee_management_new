@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
 
 const Background = styled(Box)({
     height: '100vh',
@@ -25,7 +25,7 @@ const UploadEmployee = () => {
     useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        excelFile: null,
+        uploadfile: null,
         sheetName: '',
         rowStart: '',
     });
@@ -42,12 +42,12 @@ const UploadEmployee = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const data = new FormData();
-        data.append('uploadfile', formData.uploadfile);  // Ensure the key is 'uploadfile'
+        data.append('uploadfile', formData.uploadfile);
         if (formData.sheetName) data.append('sheetName', formData.sheetName);
         if (formData.rowStart) data.append('rowStart', formData.rowStart);
     
         try {
-            await axios.post('http://localhost:5000/excel/upload', data);
+            await api.post('/excel/upload', data);
             navigate('/home');
         } catch (error) {
             console.error('Error uploading file:', error);

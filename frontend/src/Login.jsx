@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress
 import { styled } from '@mui/system';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from './api/client.js';
 
 const Background = styled(Box)({
   height: '100vh',
@@ -38,88 +38,32 @@ const SubmitButton = styled(Button)({
 });
 
 export default function Login() {
-  // const [email, setEmail] = useState('');
-  // const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  // const requestOtp = async () => {
-  //   if (!validateEmail(email)) {
-  //     alert('Please enter a valid email address.');
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   try {
-  //     await axios.post('http://localhost:5000/request-otp', { email }, { withCredentials: true });
-  //     setOtpSent(true);
-  //     alert('OTP has been sent to your email.');
-  //   } catch (error) {
-  //     console.error('Error requesting OTP:', error);
-  //     alert('Error requesting OTP. Please try again.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleLogin = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.post('http://localhost:5000/login', { email, otp }, { withCredentials: true });
-  //     // const { token } = response.data;
-  //     // localStorage.setItem('authToken', token);
-  //     navigate('/home');
-  //   } catch (error) {
-  //     console.error('Login failed:', error);
-  //     alert('Invalid OTP. Please try again.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleLogin = async () => {
-  if (!email || !password) {
-    alert("Enter email & password");
-    return;
-  }
+    if (!email || !password) {
+      alert('Enter email & password');
+      return;
+    }
 
-  setLoading(true);
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/login",
-      { email, password },
-      { withCredentials: true }
-    );
+    setLoading(true);
+    try {
+      const response = await api.post('/login', { email, password });
+      const token = response.data?.token;
 
-    const token = response.data.token;
-
-    // store token
-    localStorage.setItem("token", token);
-
-    navigate("/home");
-  } catch (error) {
-    console.error(error);
-    alert("Invalid credentials");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      if (otpSent) {
-        handleLogin();
-      } else {
-        requestOtp();
+      if (token) {
+        localStorage.setItem('token', token);
       }
+
+      navigate('/home');
+    } catch (error) {
+      console.error(error);
+      alert('Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,8 +86,8 @@ return (
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") handleLogin();
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleLogin();
           }}
         />
 
@@ -156,8 +100,8 @@ return (
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={loading}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") handleLogin();
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleLogin();
           }}
         />
 

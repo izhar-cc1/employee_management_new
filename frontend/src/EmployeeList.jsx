@@ -1,11 +1,10 @@
-// src/pages/EmployeeList.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, List, ListItem, ListItemText, IconButton, Tooltip } from '@mui/material';
-import axios from 'axios';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from './context/ProjectContext';  
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
 
 
 export default function EmployeeList() {
@@ -19,7 +18,7 @@ export default function EmployeeList() {
 
   useEffect(() => {
     // Fetch employee data from backend
-    axios.get('http://localhost:5000/', { withCredentials: true })
+    api.get('/')
       .then(response => {
         let data = response.data;
         console.log(type);
@@ -103,11 +102,16 @@ export default function EmployeeList() {
     navigate('/add-project'); // Navigate back to the AddProject page
   };
 
+  const activeEmployees = useMemo(
+    () => employees.filter(employee => employee.status === 'Active'),
+    [employees]
+  );
+
   return (
     <Box sx={{ padding: '30px', maxWidth: '800px', margin: '20px auto' }}>
       <Typography variant="h4" gutterBottom align="center">Select an Employee</Typography>
       <List>
-        {employees.filter(employee => employee.status === 'Active').map(employee => {
+        {activeEmployees.map(employee => {
           const value = employee._id;
           return (
             <ListItem key={employee._id} sx={{ borderBottom: '1px solid #ddd' }}>

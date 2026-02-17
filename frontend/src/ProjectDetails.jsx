@@ -15,9 +15,10 @@ import {
   MenuItem,
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { styled } from '@mui/system';
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
+import { formatToInputDate } from './utils/date.js';
 
 const Background = styled(Box)({
   height: '100vh',
@@ -74,14 +75,14 @@ export default function ProjectDetails() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProject, setEditedProject] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState(['Ongoing', 'Terminated', 'Completed', 'Yet to Start']);
+  const statusOptions = ['Ongoing', 'Terminated', 'Completed', 'Yet to Start'];
 
   useEffect(() => {
     if (projectId) {
-      axios.get(`http://localhost:5000/getProject/id/${projectId}`, { withCredentials: true })
+      api.get(`/getProject/id/${projectId}`)
         .then(response => {
           const projectData = response.data;
-          projectData.deadline = formatDate(projectData.deadline);
+          projectData.deadline = formatToInputDate(projectData.deadline);
           projectData.teams = projectData.teams || []; // Ensure teams is an array
           setProject(projectData);
           setEditedProject(projectData); 
@@ -98,12 +99,6 @@ export default function ProjectDetails() {
     }
   }, [projectId]);
 
-  const formatDate = (date) => {
-    if (!date) return ''; // Return an empty string for invalid or undefined dates
-    const formattedDate = new Date(date);
-    return !isNaN(formattedDate) ? formattedDate.toISOString().split('T')[0] : ''; // Check for valid date
-  };
-
   const handleEditClick = () => {
     setIsEditing(!isEditing);
   };
@@ -117,7 +112,7 @@ export default function ProjectDetails() {
   };
 
   const handleSave = () => {
-    axios.put(`http://localhost:5000/editProject/id/${projectId}`, editedProject, { withCredentials: true })
+    api.put(`/editProject/id/${projectId}`, editedProject)
       .then(() => {
         setProject(editedProject); // Update the project state with edited data
         setIsEditing(false);
@@ -134,7 +129,7 @@ export default function ProjectDetails() {
 
   const handleStatusClose = (status) => {
     if (status) {
-      axios.put(`http://localhost:5000/editProject/id/${projectId}`, { ...editedProject, status }, { withCredentials: true })
+      api.put(`/editProject/id/${projectId}`, { ...editedProject, status })
         .then(() => {
             setEditedProject((prev) => ({ ...prev, status }));
           setProject((prev) => ({ ...prev, status }));

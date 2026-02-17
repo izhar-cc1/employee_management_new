@@ -9,6 +9,8 @@ import ProjectDetails from './ProjectDetails';
 import EmployeeList from './EmployeeList';
 import { ProjectProvider } from './context/ProjectContext';
 import UploadEmployee from './UploadEmployee';
+import LeaveManagement from './LeaveManagement';
+import AttendanceManagement from './AttendanceManagement';
 
 
 export default function App() {
@@ -24,6 +26,8 @@ export default function App() {
         <Route path="/employee-details" element={<EmployeeDetails />} />
         <Route path="/project-details" element={<ProjectDetails/>}/>
         <Route path="/employee-list" element={<EmployeeList />} />
+        <Route path="/leave-management" element={<LeaveManagement />} />
+        <Route path="/attendance-management" element={<AttendanceManagement />} />
       </Routes>
     </Router>
     </ProjectProvider>

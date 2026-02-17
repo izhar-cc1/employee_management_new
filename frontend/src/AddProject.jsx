@@ -1,23 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Button, Paper, IconButton, Chip } from '@mui/material';
-import axios from 'axios';
+import React from 'react';
+import { Box, Typography, TextField, Button, Paper, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from './context/ProjectContext';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from "./hooks/useAuth.js";
+import api from './api/client.js';
 
 export default function AddProject() {
   useAuth();
   const { project, setProject } = useProject();
-  const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Fetch employee data from backend
-    axios.get('http://localhost:5000/', { withCredentials: true })
-      .then(response => setEmployees(response.data))
-      .catch(error => console.error('Error fetching employees:', error));
-  }, []);
 
   const handleAddTeam = () => {
     setProject(prev => ({
@@ -56,7 +48,7 @@ export default function AddProject() {
 
   const handleSubmit = () => {
     console.log(project);
-    axios.post('http://localhost:5000/addproject/new', project, { withCredentials: true })
+    api.post('/addproject/new', project)
       .then(() => navigate('/home'))
       .catch(error => console.error('Error adding project:', error));
   };
