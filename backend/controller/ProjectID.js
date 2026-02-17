@@ -1,10 +1,14 @@
 const path = require('path');
 const ProjectModel = require(path.join(__dirname, '..', 'models', 'project'));
+const mongoose = require('mongoose');
 
 exports.ProjectGetbyid = async (req, res) => {
     try {
         const id = req.params.projectId;  
         console.log(id);
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send('Invalid project id');
+        }
         const project = await ProjectModel.findOne({_id:id });
 
         if (!project) {  // Check if no Project is found

@@ -79,7 +79,7 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     if (projectId) {
-      api.get(`/getProject/id/${projectId}`)
+      api.get(`/projects/${projectId}`)
         .then(response => {
           const projectData = response.data;
           projectData.deadline = formatToInputDate(projectData.deadline);
@@ -112,7 +112,7 @@ export default function ProjectDetails() {
   };
 
   const handleSave = () => {
-    api.put(`/editProject/id/${projectId}`, editedProject)
+    api.put(`/projects/${projectId}`, editedProject)
       .then(() => {
         setProject(editedProject); // Update the project state with edited data
         setIsEditing(false);
@@ -129,7 +129,7 @@ export default function ProjectDetails() {
 
   const handleStatusClose = (status) => {
     if (status) {
-      api.put(`/editProject/id/${projectId}`, { ...editedProject, status })
+      api.put(`/projects/${projectId}`, { ...editedProject, status })
         .then(() => {
             setEditedProject((prev) => ({ ...prev, status }));
           setProject((prev) => ({ ...prev, status }));
@@ -243,7 +243,7 @@ export default function ProjectDetails() {
                 <TableRow>
                   <TableCell>Manager</TableCell>
                   <TableCell>
-                    {project.manager || 'N/A'}
+                    {project.managerName || project.manager || 'N/A'}
                   </TableCell>
                 </TableRow>
 

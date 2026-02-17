@@ -48,7 +48,7 @@ export default function AddProject() {
 
   const handleSubmit = () => {
     console.log(project);
-    api.post('/addproject/new', project)
+    api.post('/projects', project)
       .then(() => navigate('/home'))
       .catch(error => console.error('Error adding project:', error));
   };

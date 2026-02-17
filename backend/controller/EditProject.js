@@ -1,5 +1,6 @@
 const path = require('path');
 const ProjectModel = require(path.join(__dirname, '..', 'models', 'project'));
+const mongoose = require('mongoose');
 
 exports.editProject = async (req, res) => {
     try {
@@ -7,9 +8,17 @@ exports.editProject = async (req, res) => {
         const id = req.params.projectId; 
         const updateData = req.body;
 
+        if (updateData.managerName && !updateData.manager) {
+            updateData.manager = updateData.managerName;
+        }
+
         // Construct the filter based on provided identifiers
         const filter ={};
             filter._id = id;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'Invalid project id' });
+        }
 
         console.log('Filter:', filter);
 
@@ -17,7 +26,7 @@ exports.editProject = async (req, res) => {
         const project = await ProjectModel.findOne(filter);
 
         if (!project) {
-            return res.status(404).json({ error: 'Employee not found' });
+            return res.status(404).json({ error: 'Project not found' });
         }
         console.log('Project:', project);
 

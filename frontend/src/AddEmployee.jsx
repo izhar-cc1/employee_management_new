@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Paper, MenuItem, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Box, Button, TextField, Typography, Stepper, Step, StepLabel, Paper, MenuItem, RadioGroup, FormControlLabel, Radio, Avatar } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "./hooks/useAuth.js";
@@ -52,6 +52,8 @@ export default function AddEmployee() {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   useAuth();
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState('');
 
   const [formData, setFormData] = useState({
     first_name: '',
@@ -92,10 +94,31 @@ export default function AddEmployee() {
     });
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setPhotoFile(null);
+      setPhotoPreview('');
+      return;
+    }
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = () => {
     console.log('Submitting form data:', formData);
 
-    api.post('/addEmployee', formData)
+    const payload = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      payload.append(key, value);
+    });
+    if (photoFile) {
+      payload.append('photo', photoFile);
+    }
+
+    api.post('/addEmployee', payload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
       .then(response => {
         console.log('Employee added:', response.data);
         navigate('/home');
@@ -138,6 +161,17 @@ export default function AddEmployee() {
               <Typography variant="h6" gutterBottom>
                 Personal Information 2
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                <Avatar
+                  sx={{ width: 72, height: 72 }}
+                  src={photoPreview}
+                  alt="Employee"
+                />
+                <Button variant="outlined" component="label">
+                  Upload Photo
+                  <input type="file" accept="image/*" hidden onChange={handlePhotoChange} />
+                </Button>
+              </Box>
               <TextField fullWidth label="Email" margin="normal" name="email" value={formData.email} onChange={handleChange} required />
               <TextField fullWidth label="Address" margin="normal" name="address" value={formData.address} onChange={handleChange} required />
               <TextField fullWidth label="Aadhar Number" margin="normal" name="aadhar_number" value={formData.aadhar_number} onChange={handleChange} required />

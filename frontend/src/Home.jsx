@@ -123,7 +123,13 @@ export default function Home() {
       .then(response => {
         setEmployees(response.data);
         // Extract unique departments
-        const uniqueDepartments = [...new Set(response.data.map(emp => emp.department))];
+        const uniqueDepartments = [
+          ...new Set(
+            (response.data || [])
+              .map(emp => emp?.department)
+              .filter(dept => typeof dept === 'string' && dept.trim() !== '')
+          )
+        ];
         setDepartments(uniqueDepartments);
       })
       .catch(error => console.error('Error fetching employees:', error));
@@ -407,7 +413,10 @@ export default function Home() {
               sx={{ marginBottom: '20px', width: '250px' }}
             />
             <List>
-              {departments.filter(department => department.toLowerCase().includes(searchQuery.toLowerCase())).map(department => (
+              {departments
+                .filter(department => typeof department === 'string')
+                .filter(department => department.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(department => (
                 <DepartmentListItem button key={department} onClick={() => handleDepartmentClick(department)}>
                   <ListItemText primary={department} />
                 </DepartmentListItem>
@@ -440,7 +449,7 @@ export default function Home() {
                     {projects.filter(project => project?.name?.toLowerCase().includes(searchQuery.toLowerCase())).map(project => (
                     <TableRow key={project._id}>
                       <TableCell>{project.name}</TableCell>
-                      <TableCell>{project.manager}</TableCell>
+                      <TableCell>{project.managerName || project.manager || 'N/A'}</TableCell>
                       <TableCell>{project.description}</TableCell>
                       <TableCell align="center">
                         <Button

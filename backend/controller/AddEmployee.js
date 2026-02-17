@@ -4,6 +4,9 @@ const EmployeeModel = require(path.join(__dirname, '..', 'models', 'employees'))
 exports.createEmployee = async (req, res) => {
     const employeeData = req.body;
     try {
+        if (req.file) {
+            employeeData.photo = `/uploads/employees/${req.file.filename}`;
+        }
         // Check for existing employee by id, email, phone number, or aadhar
         const existingEmployee = await EmployeeModel.findOne({
             $or: [

@@ -14,6 +14,7 @@ const EmployeeSchema = new mongoose.Schema({
         lowercase: true,
         match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address.']
     },
+    photo: { type: String, default: "" },
     // 🔐 ADD PASSWORD FIELD
     password: {
         type: String,

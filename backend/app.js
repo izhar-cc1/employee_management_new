@@ -23,6 +23,7 @@ dotenv.config({ path: path.join(__dirname, "config", "config.env") });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   cors({
     origin: ["http://localhost:5173"],
@@ -37,14 +38,9 @@ const getLatestSequence = require(
 
 const addemp = require(path.join(__dirname, "routes", "addemp"));
 const displayemp = require(path.join(__dirname, "routes", "displayemp"));
-const displayproject = require(
-  path.join(__dirname, "routes", "displayproject"),
-);
 const editbyid = require(path.join(__dirname, "routes", "editbyid"));
 const getbyid = require(path.join(__dirname, "routes", "getbyid"));
-const addproject = require(path.join(__dirname, "routes", "addproject"));
-const getProject = require(path.join(__dirname, "routes", "projectid"));
-const editproject = require(path.join(__dirname, "routes", "editproject"));
+const projects = require(path.join(__dirname, "routes", "projects"));
 const leaves = require(path.join(__dirname, "routes", "leaves"));
 const attendance = require(path.join(__dirname, "routes", "attendance"));
 
@@ -297,12 +293,9 @@ const verifyToken = (req, res, next) => {
 
 app.use("/addEmployee/", verifyToken, addemp);
 app.use("/", verifyToken, displayemp); // Public route
-app.use("/projects/", verifyToken, displayproject);
 app.use("/getEmployee/", verifyToken, getbyid);
 app.use("/editEmployee/", verifyToken, editbyid);
-app.use("/addProject", verifyToken, addproject);
-app.use("/getProject/", verifyToken, getProject);
-app.use("/editProject/", verifyToken, editproject);
+app.use("/projects", verifyToken, projects);
 app.use("/leaves", verifyToken, leaves);
 app.use("/attendance", verifyToken, attendance);
 

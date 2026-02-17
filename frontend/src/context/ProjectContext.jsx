@@ -6,8 +6,9 @@ const ProjectContext = createContext();
 export const ProjectProvider = ({ children }) => {
   const [project, setProject] = useState({
     name: '',
-    manager: '',
-    teams: [{ id: Date.now(), name: '', leader: '', members: [] }],
+    managerId: '',
+    managerName: '',
+    teams: [{ id: Date.now(), name: '', leaderId: '', leaderName: '', members: [], membersNames: [] }],
     description: '',
     deadline: ''
   });

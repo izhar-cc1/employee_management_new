@@ -80,7 +80,7 @@ export default function EmployeeDetails() {
             // Fetch all projects by IDs
             Promise.all(
               projectIds.map(id =>
-                api.get(`/getProject/id/${id}`)
+                api.get(`/projects/${id}`)
                   .then(response => response.data)
               )
             )
