@@ -336,6 +336,24 @@ export default function EmployeeDetails() {
         <Grid item xs={12}>
           <GlassCard>
             <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: '8px' }}>Skills</Typography>
+              <Divider sx={{ marginBottom: '12px' }} />
+              {Array.isArray(employee.skills) && employee.skills.length > 0 ? (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {employee.skills.map((skill) => (
+                    <Chip key={skill} label={skill} />
+                  ))}
+                </Box>
+              ) : (
+                <Typography color="text.secondary">No skills listed.</Typography>
+              )}
+            </CardContent>
+          </GlassCard>
+        </Grid>
+
+        <Grid item xs={12}>
+          <GlassCard>
+            <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, marginBottom: '8px' }}>Projects</Typography>
               <Divider sx={{ marginBottom: '12px' }} />
               {projects.length > 0 ? (

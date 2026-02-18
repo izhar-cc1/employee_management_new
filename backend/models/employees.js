@@ -85,7 +85,8 @@ const EmployeeSchema = new mongoose.Schema({
     },
     projects:{
         projectId:[{type:String}]
-    }
+    },
+    skills: [{ type: String }]
 
 });
 

@@ -55,6 +55,7 @@ export default function AddEmployee() {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState('');
 
+  const role = localStorage.getItem('role') || 'Employee';
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -62,6 +63,7 @@ export default function AddEmployee() {
     phone_number: '',
     email: '',
     password: '',
+    access_role: 'Employee',
     address: '',
     aadhar_number: '',
     highest_qualification: '',
@@ -79,6 +81,7 @@ export default function AddEmployee() {
     account_number: '',
     ifsc_code: ''
   });
+  const [skillsInput, setSkillsInput] = useState('');
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -93,6 +96,16 @@ export default function AddEmployee() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleSkillsChange = (e) => {
+    const value = e.target.value;
+    setSkillsInput(value);
+    const skills = value
+      .split(',')
+      .map((skill) => skill.trim())
+      .filter((skill) => skill.length > 0);
+    setFormData((prev) => ({ ...prev, skills }));
   };
 
   const handlePhotoChange = (e) => {
@@ -257,6 +270,21 @@ export default function AddEmployee() {
               <Typography variant="h6" gutterBottom>
                 Current Role and Designation
               </Typography>
+              <TextField fullWidth select label="System Role" margin="normal" name="access_role" value={formData.access_role} onChange={handleChange} required>
+                {['Employee', 'Manager', ...(role === 'Admin' ? ['Admin'] : [])].map((option) => (
+                  <CustomMenuItem key={option} value={option}>
+                    {option}
+                  </CustomMenuItem>
+                ))}
+              </TextField>
+              <TextField
+                fullWidth
+                label="Skills (comma separated)"
+                margin="normal"
+                value={skillsInput}
+                onChange={handleSkillsChange}
+                placeholder="React, Node.js, MongoDB"
+              />
               <TextField fullWidth select label="Current Role" margin="normal" name="current_role" value={formData.current_role} onChange={handleChange} required>
                 {['Intern', 'Trainee', 'Junior', 'Senior','Team Lead','Manager'].map((option) => (
                   <CustomMenuItem key={option} value={option}>

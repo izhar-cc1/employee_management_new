@@ -7,6 +7,10 @@ exports.createEmployee = async (req, res) => {
         if (req.file) {
             employeeData.photo = `/uploads/employees/${req.file.filename}`;
         }
+        const requesterRole = req.user?.role || "Employee";
+        if (employeeData.access_role === "Admin" && requesterRole !== "Admin") {
+            return res.status(403).json({ message: "Only admin can create admin users" });
+        }
         if (!employeeData.access_role) {
             employeeData.access_role =
                 employeeData.current_role === "Manager" ? "Manager" : "Employee";
