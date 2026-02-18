@@ -11,6 +11,8 @@ import { ProjectProvider } from './context/ProjectContext';
 import UploadEmployee from './UploadEmployee';
 import LeaveManagement from './LeaveManagement';
 import AttendanceManagement from './AttendanceManagement';
+import Dashboard from './Dashboard';
+import SidebarLayout from './layouts/SidebarLayout';
 
 
 export default function App() {
@@ -19,15 +21,18 @@ export default function App() {
       <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/add-employee" element={<AddEmployee/>} />
-        <Route path="/upload-employee" element={<UploadEmployee/>}/>
-        <Route path="/add-project" element={<AddProject/>} />
-        <Route path="/employee-details" element={<EmployeeDetails />} />
-        <Route path="/project-details" element={<ProjectDetails/>}/>
-        <Route path="/employee-list" element={<EmployeeList />} />
-        <Route path="/leave-management" element={<LeaveManagement />} />
-        <Route path="/attendance-management" element={<AttendanceManagement />} />
+        <Route element={<SidebarLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/add-employee" element={<AddEmployee/>} />
+          <Route path="/upload-employee" element={<UploadEmployee/>}/>
+          <Route path="/add-project" element={<AddProject/>} />
+          <Route path="/employee-details" element={<EmployeeDetails />} />
+          <Route path="/project-details" element={<ProjectDetails/>}/>
+          <Route path="/employee-list" element={<EmployeeList />} />
+          <Route path="/leave-management" element={<LeaveManagement />} />
+          <Route path="/attendance-management" element={<AttendanceManagement />} />
+        </Route>
       </Routes>
     </Router>
     </ProjectProvider>

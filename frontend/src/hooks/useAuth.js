@@ -8,8 +8,16 @@ export const useAuth = () => {
 
   useEffect(() => {
     api
-      .get("/")
-      .then(() => {
+      .get("/me")
+      .then((response) => {
+        const role = response.data?.role;
+        const employeeId = response.data?.employeeId;
+        if (role) {
+          localStorage.setItem("role", role);
+        }
+        if (employeeId) {
+          localStorage.setItem("employeeId", employeeId);
+        }
         // ✅ token is valid
         setLoading(false);
       })

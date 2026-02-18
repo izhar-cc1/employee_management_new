@@ -39,6 +39,8 @@ export default function AttendanceManagement() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('');
   const [formError, setFormError] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editState, setEditState] = useState({ status: '', checkIn: '', checkOut: '', notes: '' });
   const [formState, setFormState] = useState({
     employeeId: '',
     date: '',
@@ -135,6 +137,31 @@ export default function AttendanceManagement() {
       fetchAttendance();
     } catch (error) {
       console.error('Error updating attendance:', error);
+    }
+  };
+
+  const startEdit = (record) => {
+    setEditingId(record._id);
+    setEditState({
+      status: record.status || '',
+      checkIn: record.checkIn || '',
+      checkOut: record.checkOut || '',
+      notes: record.notes || '',
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditState({ status: '', checkIn: '', checkOut: '', notes: '' });
+  };
+
+  const saveEdit = async (recordId) => {
+    try {
+      await api.patch(`/attendance/${recordId}`, editState);
+      cancelEdit();
+      fetchAttendance();
+    } catch (error) {
+      console.error('Error saving attendance:', error);
     }
   };
 
@@ -281,23 +308,88 @@ export default function AttendanceManagement() {
                     {record.employeeName} (#{record.employeeId})
                   </TableCell>
                   <TableCell>{formatDate(record.date)}</TableCell>
-                  <TableCell>{record.status}</TableCell>
-                  <TableCell>{record.checkIn || '-'}</TableCell>
-                  <TableCell>{record.checkOut || '-'}</TableCell>
-                  <TableCell>{record.notes || '-'}</TableCell>
-                  <TableCell align="right">
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', flexWrap: 'wrap' }}>
-                      {statusOptions.map((status) => (
-                        <Button
-                          key={`${record._id}-${status}`}
-                          size="small"
-                          variant={record.status === status ? 'contained' : 'outlined'}
-                          onClick={() => handleQuickStatus(record._id, status)}
+                  <TableCell>
+                    {editingId === record._id ? (
+                      <FormControl size="small" sx={{ minWidth: 140 }}>
+                        <Select
+                          value={editState.status}
+                          onChange={(event) => setEditState((prev) => ({ ...prev, status: event.target.value }))}
                         >
-                          {status}
+                          {statusOptions.map((status) => (
+                            <MenuItem key={status} value={status}>
+                              {status}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      record.status
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === record._id ? (
+                      <TextField
+                        size="small"
+                        value={editState.checkIn}
+                        onChange={(event) => setEditState((prev) => ({ ...prev, checkIn: event.target.value }))}
+                      />
+                    ) : (
+                      record.checkIn || '-'
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === record._id ? (
+                      <TextField
+                        size="small"
+                        value={editState.checkOut}
+                        onChange={(event) => setEditState((prev) => ({ ...prev, checkOut: event.target.value }))}
+                      />
+                    ) : (
+                      record.checkOut || '-'
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === record._id ? (
+                      <TextField
+                        size="small"
+                        value={editState.notes}
+                        onChange={(event) => setEditState((prev) => ({ ...prev, notes: event.target.value }))}
+                      />
+                    ) : (
+                      record.notes || '-'
+                    )}
+                  </TableCell>
+                  <TableCell align="right">
+                    {editingId === record._id ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+                        <Button size="small" variant="contained" onClick={() => saveEdit(record._id)}>
+                          Save
                         </Button>
-                      ))}
-                    </Box>
+                        <Button size="small" variant="outlined" onClick={cancelEdit}>
+                          Cancel
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', flexWrap: 'wrap' }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => startEdit(record)}
+                        >
+                          Edit
+                        </Button>
+                        {statusOptions.map((status) => (
+                          <Button
+                            key={`${record._id}-${status}`}
+                            size="small"
+                            variant={record.status === status ? 'contained' : 'outlined'}
+                            onClick={() => handleQuickStatus(record._id, status)}
+                          >
+                            {status}
+                          </Button>
+                        ))}
+                      </Box>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

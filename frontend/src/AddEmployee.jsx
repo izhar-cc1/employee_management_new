@@ -61,6 +61,7 @@ export default function AddEmployee() {
     DoB: '',
     phone_number: '',
     email: '',
+    password: '',
     address: '',
     aadhar_number: '',
     highest_qualification: '',
@@ -173,6 +174,7 @@ export default function AddEmployee() {
                 </Button>
               </Box>
               <TextField fullWidth label="Email" margin="normal" name="email" value={formData.email} onChange={handleChange} required />
+              <TextField fullWidth label="Password" margin="normal" name="password" type="password" value={formData.password} onChange={handleChange} required />
               <TextField fullWidth label="Address" margin="normal" name="address" value={formData.address} onChange={handleChange} required />
               <TextField fullWidth label="Aadhar Number" margin="normal" name="aadhar_number" value={formData.aadhar_number} onChange={handleChange} required />
             </Box>
@@ -279,22 +281,30 @@ export default function AddEmployee() {
           )}
         </Box>
 
-        <Box display="flex" justifyContent="space-between">
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <Button
-            disabled={activeStep === 0}
-            onClick={handleBack}
+            variant="outlined"
+            onClick={() => navigate('/home')}
           >
-            Back
+            Back to Home
           </Button>
-          {activeStep === sections.length - 1 ? (
-            <StyledButton onClick={handleSubmit}>
-              Submit
-            </StyledButton>
-          ) : (
-            <StyledButton onClick={handleNext}>
-              Next
-            </StyledButton>
-          )}
+          <Box display="flex" gap="10px">
+            <Button
+              disabled={activeStep === 0}
+              onClick={handleBack}
+            >
+              Back
+            </Button>
+            {activeStep === sections.length - 1 ? (
+              <StyledButton onClick={handleSubmit}>
+                Submit
+              </StyledButton>
+            ) : (
+              <StyledButton onClick={handleNext}>
+                Next
+              </StyledButton>
+            )}
+          </Box>
         </Box>
       </StyledPaper>
     </Background>

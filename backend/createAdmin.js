@@ -11,6 +11,7 @@ async function run(){
    DoB:new Date("2000-01-01"),
    email:"admin@gmail.com",
    password:"admin123",   // 🔥 plain password only
+   access_role:"Admin",
    phone_number:"9999999999",
    address:"test",
    aadhar_number:"123456789012",

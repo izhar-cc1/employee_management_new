@@ -107,6 +107,13 @@ exports.updateLeave = async (req, res) => {
     const { leaveType, startDate, endDate, reason, status, approverNote } =
       req.body;
 
+    if (status) {
+      const role = req.user?.role || "Employee";
+      if (!["Admin", "Manager"].includes(role)) {
+        return res.status(403).json({ message: "Only admin or manager can approve or reject leave" });
+      }
+    }
+
     if (leaveType) {
       if (!LEAVE_TYPES.includes(leaveType)) {
         return res.status(400).json({ message: "Invalid leave type" });

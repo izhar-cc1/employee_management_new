@@ -53,12 +53,20 @@ export default function Login() {
     try {
       const response = await api.post('/login', { email, password });
       const token = response.data?.token;
+      const role = response.data?.role;
+      const employeeId = response.data?.employeeId;
 
       if (token) {
         localStorage.setItem('token', token);
       }
+      if (role) {
+        localStorage.setItem('role', role);
+      }
+      if (employeeId) {
+        localStorage.setItem('employeeId', employeeId);
+      }
 
-      navigate('/home');
+      navigate('/dashboard');
     } catch (error) {
       console.error(error);
       alert('Invalid credentials');

@@ -1,62 +1,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Button, Paper, TextField, List, ListItem, ListItemText, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
-import LogoutIcon from '@mui/icons-material/Logout';
-import ReportIcon from '@mui/icons-material/Report';
-import WorkOutlineIcon from '@mui/icons-material/WorkOutline'; // Use this or similar icon for Projects
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from "./hooks/useAuth.js";
 import api from './api/client.js';
 
 const ITEMS_PER_PAGE = 6;
 
-const Background = styled(Box)({
-  height: '100vh',
-  backgroundColor: '#fff',
-  display: 'flex',
-});
-
-const Dashboard = styled(Box)({
-  background: 'linear-gradient(to right, #4facfe, #00f2fe)',
-  width: '240px',
-  padding: '20px',
-  boxShadow: '2px 0px 8px rgba(0, 0, 0, 0.1)',
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  bottom: 0,
-  overflowY: 'auto',
-});
-
-const DashboardItem = styled(ListItem)({
-  marginBottom: '10px',
-  borderRadius: '8px',
-  '&:hover': {
-    backgroundColor: '#f0f0f0',
-  },
-});
-
 const ContentArea = styled(Box)({
   flex: 1,
-  padding: '40px',
+  padding: '20px',
   overflowY: 'auto',
-  marginLeft: '240px',  // Space for fixed dashboard
-  marginTop: '40px',    // Space for fixed header
 });
 
 const ContentAreaHead = styled(Box)({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  position: 'fixed',
+  position: 'sticky',
   top: 0,
-  width: '69%', // Adjusted width to fit content
+  width: '100%',
   backgroundColor: '#fff',
   zIndex: 1,
-  padding: '10px 20px',
+  padding: '10px 0',
   boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Shadow for better separation
 });
 
@@ -107,11 +72,13 @@ const ProjectListItem = styled(ListItem)({
 
 export default function Home() {
   const { loading } = useAuth();
+  const role = localStorage.getItem('role') || 'Employee';
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [projects, setProjects] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState('employees'); // 'employees', 'departments', or 'projects'
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Active'); // Default status
   const statusOptions = ['Active', 'Terminated', 'Retired', 'Resigned'];
@@ -119,6 +86,10 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (role === 'Employee') {
+      navigate('/dashboard');
+      return;
+    }
     api.get('/')
       .then(response => {
         setEmployees(response.data);
@@ -139,6 +110,13 @@ export default function Home() {
       .then(response => setProjects(response.data))
       .catch(error => console.error('Error fetching projects:', error));
   }, []);
+
+  useEffect(() => {
+    const viewParam = searchParams.get('view');
+    if (viewParam && viewParam !== view) {
+      setView(viewParam);
+    }
+  }, [searchParams, view]);
 
   const handleAddEmployeeClick = () => {
     navigate('/add-employee');
@@ -161,13 +139,6 @@ export default function Home() {
     navigate('/project-details', { state: { projectId: id } });
   };
 
-  const handleLeaveManagementClick = () => {
-    navigate('/leave-management');
-  };
-
-  const handleAttendanceManagementClick = () => {
-    navigate('/attendance-management');
-  };
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -175,6 +146,7 @@ export default function Home() {
 
   const handleDashboardClick = (type) => {
     setView(type);
+    setSearchParams({ view: type });
     setSelectedDepartment('');
     setSelectedStatus(type === 'employees' ? 'Active' : selectedStatus);
     setCurrentPage(1);
@@ -183,26 +155,15 @@ export default function Home() {
   const handleDepartmentClick = (department) => {
     setSelectedDepartment(department);
     setView('employees');
+    setSearchParams({ view: 'employees' });
     setCurrentPage(1);
   };
 
-  const handleLogout = () => {
-    api.post('/logout')
-      .then(response => {
-        console.log(response.data);
-        // Optionally, you can handle any state updates or cleanup here
-        navigate('/'); // Navigate to the home page or login page after logout
-        alert('Logged out successfully!!');
-      })
-      .catch(error => {
-        console.error('Error during logout:', error);
-      });
-  };
-  
 
   const handleStatusClick = (cstatus) => {
     setSelectedStatus(cstatus);
     setView('employees'); // Return to employees view with status filter applied
+    setSearchParams({ view: 'employees' });
     console.log(cstatus);
     setCurrentPage(1);
     
@@ -211,8 +172,8 @@ export default function Home() {
   const filteredEmployees = useMemo(
     () =>
       employees.filter(employee =>
-        (`${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          employee.department.toLowerCase().includes(searchQuery.toLowerCase())) &&
+        (`${employee.first_name ?? ''} ${employee.last_name ?? ''}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (employee.department ?? '').toLowerCase().includes(searchQuery.toLowerCase())) &&
         (view === 'employees' ? (selectedDepartment ? employee.department === selectedDepartment : true) : true) &&
         (view === 'employees' ? employee.status === selectedStatus : true)
       ),
@@ -244,44 +205,6 @@ export default function Home() {
   };
 
   return (
-    <Background>
-      <Dashboard>
-        <Typography variant="h6" gutterBottom>
-          <DashboardIcon sx={{ marginRight: '10px', verticalAlign: 'middle' }} />
-          Dashboard
-        </Typography>
-        <Divider sx={{ marginBottom: '20px' }} />
-        <List>
-          <DashboardItem button onClick={() => handleDashboardClick('employees')}>
-            <PeopleIcon sx={{ marginRight: '10px' }} />
-            <ListItemText primary="Employees" />
-          </DashboardItem>
-          <DashboardItem button onClick={() => handleDashboardClick('departments')}>
-            <DashboardIcon sx={{ marginRight: '10px' }} />
-            <ListItemText primary="Departments" />
-          </DashboardItem>
-          <DashboardItem button onClick={() => handleDashboardClick('projects')}>
-            <WorkOutlineIcon sx={{ marginRight: '10px' }} />
-            <ListItemText primary="Projects" />
-          </DashboardItem>
-          <DashboardItem button onClick={() => handleDashboardClick('status')}>
-            <ReportIcon sx={{marginRight:'10px'}}/>
-            <Typography sx={{ marginRight: '10px' }}>Status</Typography>
-          </DashboardItem>
-          <DashboardItem button onClick={handleLeaveManagementClick}>
-            <EventNoteIcon sx={{ marginRight: '10px' }} />
-            <ListItemText primary="Leave Management" />
-          </DashboardItem>
-          <DashboardItem button onClick={handleAttendanceManagementClick}>
-            <AccessTimeIcon sx={{ marginRight: '10px' }} />
-            <ListItemText primary="Attendance" />
-          </DashboardItem>
-          <DashboardItem button onClick={() => handleLogout()}>
-            <LogoutIcon sx={{ marginRight: '10px' }} />
-            <ListItemText primary="LogOut" />
-          </DashboardItem>
-        </List>
-      </Dashboard>
       <ContentArea>
         <ContentAreaHead>
           <Typography variant="h4" gutterBottom>
@@ -472,6 +395,5 @@ export default function Home() {
           </Box>
         ): null}
       </ContentArea>
-    </Background>
   );
 }

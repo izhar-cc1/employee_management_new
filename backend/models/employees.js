@@ -20,6 +20,11 @@ const EmployeeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    access_role: {
+        type: String,
+        enum: ['Admin', 'Manager', 'Employee'],
+        default: 'Employee'
+    },
     phone_number: {
         type: String,
         minlength: 10,

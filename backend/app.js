@@ -35,14 +35,18 @@ DBConnect();
 const getLatestSequence = require(
   path.join(__dirname, "middleware", "sequence"),
 );
+const requireRole = require(path.join(__dirname, "middleware", "requireRole"));
 
 const addemp = require(path.join(__dirname, "routes", "addemp"));
 const displayemp = require(path.join(__dirname, "routes", "displayemp"));
 const editbyid = require(path.join(__dirname, "routes", "editbyid"));
 const getbyid = require(path.join(__dirname, "routes", "getbyid"));
+const deleteemp = require(path.join(__dirname, "routes", "deleteemp"));
 const projects = require(path.join(__dirname, "routes", "projects"));
 const leaves = require(path.join(__dirname, "routes", "leaves"));
 const attendance = require(path.join(__dirname, "routes", "attendance"));
+const me = require(path.join(__dirname, "routes", "me"));
+const dashboard = require(path.join(__dirname, "routes", "dashboard"));
 
 global.__basedir = __dirname;
 
@@ -241,12 +245,22 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Wrong password" });
     }
 
+    const derivedRole =
+      user.access_role ||
+      (user.email === "admin@gmail.com"
+        ? "Admin"
+        : user.current_role === "Manager"
+          ? "Manager"
+          : "Employee");
+
     // create token
     const token = jwtt.sign(
       {
         id: user._id,
         email: user.email,
         name: user.first_name,
+        role: derivedRole,
+        employeeId: user.id,
       },
       "jwt-secret-key",
       { expiresIn: "1d" },
@@ -266,6 +280,8 @@ app.post("/login", async (req, res) => {
       message: "Login success",
       token,
       user: user.first_name,
+      role: derivedRole,
+      employeeId: user.id,
     });
   } catch (err) {
     console.log(err);
@@ -294,10 +310,13 @@ const verifyToken = (req, res, next) => {
 app.use("/addEmployee/", verifyToken, addemp);
 app.use("/", verifyToken, displayemp); // Public route
 app.use("/getEmployee/", verifyToken, getbyid);
-app.use("/editEmployee/", verifyToken, editbyid);
+app.use("/editEmployee/", verifyToken, requireRole(["Admin"]), editbyid);
+app.use("/deleteEmployee/", verifyToken, requireRole(["Admin"]), deleteemp);
 app.use("/projects", verifyToken, projects);
 app.use("/leaves", verifyToken, leaves);
 app.use("/attendance", verifyToken, attendance);
+app.use("/me", verifyToken, me);
+app.use("/dashboard", verifyToken, dashboard);
 
 // const oAuth2Client = new google.auth.OAuth2(
 //   process.env.CLIENT_ID,

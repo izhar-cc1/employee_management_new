@@ -7,6 +7,10 @@ exports.createEmployee = async (req, res) => {
         if (req.file) {
             employeeData.photo = `/uploads/employees/${req.file.filename}`;
         }
+        if (!employeeData.access_role) {
+            employeeData.access_role =
+                employeeData.current_role === "Manager" ? "Manager" : "Employee";
+        }
         // Check for existing employee by id, email, phone number, or aadhar
         const existingEmployee = await EmployeeModel.findOne({
             $or: [

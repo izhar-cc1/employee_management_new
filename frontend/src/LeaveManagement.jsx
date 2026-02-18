@@ -43,6 +43,7 @@ const calcDays = (startDate, endDate) => {
 export default function LeaveManagement() {
   useAuth();
   const navigate = useNavigate();
+  const role = localStorage.getItem('role') || 'Employee';
   const [employees, setEmployees] = useState([]);
   const [leaves, setLeaves] = useState([]);
   const [statusFilter, setStatusFilter] = useState('All');
@@ -288,7 +289,7 @@ export default function LeaveManagement() {
                   </TableCell>
                   <TableCell>{leave.reason || '-'}</TableCell>
                   <TableCell align="right">
-                    {leave.status === 'Pending' ? (
+                    {leave.status === 'Pending' && ['Admin', 'Manager'].includes(role) ? (
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                         <Button
                           size="small"
